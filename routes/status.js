@@ -1,18 +1,25 @@
 const express = require('express');
 const router = express.Router();
-const { getDB } = require('../config/db');
+const mongoose = require("mongoose");
+
 
 
 router.get('/', async (req,res)=>{
+    const connectionState = mongoose.connection.readyState; // 1 means connected
+
     try {
-        const db = getDB();
-        const collections = await db.listCollections().toArray();
+        if (connectionState !== 1) {
+            return res.status(500).json({
+                status: "error", db: "disconnected", message: "Mongoose not connected",
+            });
+        }
 
-        res.json({
-        status: 'ok',db: 'connected', collections: collections.map(c => c.name),timestamp: new Date()
-        });
+        const collections = await mongoose.connection.db.listCollections().toArray();
+        const collectionNames = collections.map((col) => col.name);
+        res.json({status: "ok", db: "connected", collections: collectionNames, timestamp: new Date(), });
 
-    } catch (err) {
+    } 
+    catch (err) {
         console.error('DB check failed:', err.message);
         res.status(500).json({  status: 'error', db: 'disconnected', message: err.message });
     }
