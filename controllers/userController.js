@@ -3,6 +3,19 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 
 
+//Get My Profile
+const getMe= async ( req, res ) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    res.json({
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+  });
+}
+
 // CREATE user
 const createUser = async (req, res) => {
   try {
@@ -79,7 +92,7 @@ const deleteUserById = async (req, res) => {
 
 
 module.exports = {
-  createUser, updateUser,
+  createUser, updateUser, getMe,
   getAllUser, getUserById, deleteUserById,
 };
 
